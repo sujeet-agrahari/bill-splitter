@@ -14,8 +14,10 @@ async function welcome() {
     console.log(gradient.pastel.multiline(data) + '\n');
   });
 
-console.log('Made By: ' + '\u001b]8;;https://github.com/sujeet-agrahari\u0007Sujeet Agrahari\u001b]8;;\u0007');
-
+  console.log(
+    'Made By: ' +
+      '\u001b]8;;https://github.com/sujeet-agrahari\u0007Sujeet Agrahari\u001b]8;;\u0007'
+  );
 
   console.log(`
     ${chalk.cyanBright(
@@ -83,10 +85,10 @@ async function getAmountAndSharedWithPersons(persons) {
         message: 'Enter the amount',
         validate: (value) => {
           const parsedValue = parseFloat(value);
-          return (
-            (!isNaN(parsedValue) && parsedValue >= 0) || value.trim() !== '' ||
-            '😠 Enter a valid positive number'
-          );
+          return value.trim() === '' ||
+            (!isNaN(parsedValue) && parsedValue >= 0)
+            ? true
+            : '😠 Enter a valid positive number';
         },
       },
     ]);
@@ -197,12 +199,11 @@ async function main() {
   const amountAndSharedPersons = await getAmountAndSharedWithPersons(persons);
   const { gst, serviceCharge } = await getAdditionalCharges();
   console.log(
-    gradient.pastel.multiline(`${figures.tick} The bill has been generated!`) +
+    gradient.pastel.multiline(`\n${figures.tick} The bill has been generated!`) +
       '\n'
   );
-  calculateAmounts([], 0, 0, []);
-  console.log('\n');
-  console.log(chalk.bgMagenta(`Thanks for using Bill Splitter 🤗!`));
+  calculateAmounts(amountAndSharedPersons, gst, serviceCharge, persons);
+  console.log(chalk.bgMagenta(`Thanks for using Bill Splitter 🤗!\n`));
 }
 
 main();
