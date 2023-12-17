@@ -190,6 +190,8 @@ function calculateAmounts(
     result[person] = parseFloat(amountWithAdditionalCharge.toFixed(2));
   }
 
+  // add total to the table as well
+  result.Total = Object.values(result).reduce((total, amount) => total + amount, 0)
   logResultTable(result);
 }
 
