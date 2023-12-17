@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import gradient from 'gradient-string';
@@ -11,6 +13,9 @@ async function welcome() {
   await figlet(`Bill Splitter`, (err, data) => {
     console.log(gradient.pastel.multiline(data) + '\n');
   });
+
+console.log('Made By: ' + '\u001b]8;;https://github.com/sujeet-agrahari\u0007Sujeet Agrahari\u001b]8;;\u0007');
+
 
   console.log(`
     ${chalk.cyanBright(
