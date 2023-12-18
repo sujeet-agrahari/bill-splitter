@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/sujeet-agrahari/bill-splitter/compare/v1.1.0...v1.2.0) (2023-12-18)
+
+
+### Features
+
+* copy the bill to clipboard ([ff994af](https://github.com/sujeet-agrahari/bill-splitter/commit/ff994af9073080edc8635c8d16ad415006d51ec8))
+
 ## [1.1.0](https://github.com/sujeet-agrahari/bill-splitter/compare/v1.0.5...v1.1.0) (2023-12-17)
 
 
