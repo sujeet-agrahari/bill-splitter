@@ -6,6 +6,8 @@ import gradient from 'gradient-string';
 import figlet from 'figlet';
 import figures from 'figures';
 import Table from 'cli-table';
+import clipboardy from 'clipboardy';
+import stripAnsi from 'strip-ansi';
 
 const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
 
@@ -103,7 +105,7 @@ async function getAmountAndSharedWithPersons(persons) {
         type: 'checkbox',
         name: 'sharedPersons',
         message: 'Select persons who shared:',
-        choices: [...persons, 'all'],
+        choices: ['all', ...persons],
         validate: (value) =>
           value.length > 0 || chalk.red('😠 Select at least one person!'),
       },
@@ -162,7 +164,14 @@ function logResultTable(result) {
     table.push([person, result[person]]);
   }
 
-  console.log(table.toString());
+  // Display the table
+  const tableString = table.toString();
+  console.log(tableString);
+
+  clipboardy.writeSync(stripAnsi(tableString));
+  console.log(
+    chalk.greenBright(`\n${figures.tick} Table copied to clipboard! \n`)
+  );
 }
 
 function calculateAmounts(
@@ -191,7 +200,10 @@ function calculateAmounts(
   }
 
   // add total to the table as well
-  result.Total = Object.values(result).reduce((total, amount) => total + amount, 0)
+  result.Total = Object.values(result).reduce(
+    (total, amount) => total + amount,
+    0
+  );
   logResultTable(result);
 }
 
@@ -201,8 +213,7 @@ async function main() {
   const amountAndSharedPersons = await getAmountAndSharedWithPersons(persons);
   const { gst, serviceCharge } = await getAdditionalCharges();
   console.log(
-    gradient.pastel.multiline(`\n${figures.tick} The bill has been generated!`) +
-      '\n'
+    gradient.pastel.multiline(`\n🍻 The bill has been generated!`) + '\n'
   );
   calculateAmounts(amountAndSharedPersons, gst, serviceCharge, persons);
   console.log(chalk.bgMagenta(`Thanks for using Bill Splitter 🤗!\n`));
