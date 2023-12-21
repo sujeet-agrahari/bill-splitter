@@ -5,10 +5,10 @@ import Table from 'cli-table3'
 import clipboardy from 'clipboardy'
 import stripAnsi from 'strip-ansi'
 import figures from 'figures'
-import { promptAdditionalCostAndDeduction, promptAmountAndSharedPersons, promptPayerAndUPI, promptPersonName } from './prompts.js'
+import { promptAdditionalCostAndDeduction, promptAmountAndSharedPersons, promptPayerAndUPI, promptPersonName } from './lib/prompts.js'
 
-import { excitementLog, headingLog, infoLog, instructionLog, log, successLog, thankYouLog } from './logger.js'
-import { calculateAmounts } from './calculation.js'
+import { excitementLog, headingLog, infoLog, instructionLog, log, successLog, thankYouLog } from './lib/logger.js'
+import { calculateAmounts } from './lib/calculation.js'
 
 async function displayWelcomeMessage () {
   await figlet('Bill Splitter', (_err, data) => {
@@ -50,6 +50,14 @@ async function getAdditionalCostAndDeduction () {
     '👉 Enter the additional charges: GST & Service Charge! (press ENTER to skip)'
   )
   return promptAdditionalCostAndDeduction()
+}
+
+async function getPaymentDetails () {
+  headingLog(' STEP-4 ')
+  instructionLog(
+    '👉 Enter payment details! (press ENTER to skip)'
+  )
+  return promptPayerAndUPI()
 }
 
 function generatePaymentMessage (payDetail) {
@@ -104,7 +112,7 @@ async function main () {
     additionalCostAndDeduction,
     personNames
   )
-  const payDetail = await promptPayerAndUPI()
+  const payDetail = await getPaymentDetails()
   excitementLog('\n🍻 The bill has been generated! \n')
   displayResultTable(billDetail, payDetail)
   thankYouLog(' Thanks for using Bill Splitter 🤗! \n')
