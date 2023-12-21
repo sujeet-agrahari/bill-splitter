@@ -1,222 +1,113 @@
 #!/usr/bin/env node
 
-import chalk from 'chalk';
-import inquirer from 'inquirer';
-import gradient from 'gradient-string';
-import figlet from 'figlet';
-import figures from 'figures';
-import Table from 'cli-table';
-import clipboardy from 'clipboardy';
-import stripAnsi from 'strip-ansi';
+import figlet from 'figlet'
+import Table from 'cli-table3'
+import clipboardy from 'clipboardy'
+import stripAnsi from 'strip-ansi'
+import figures from 'figures'
+import { promptAdditionalCostAndDeduction, promptAmountAndSharedPersons, promptPayerAndUPI, promptPersonName } from './prompts.js'
 
-const sleep = (ms = 2000) => new Promise((r) => setTimeout(r, ms));
+import { excitementLog, headingLog, infoLog, instructionLog, log, successLog, thankYouLog } from './logger.js'
+import { calculateAmounts } from './calculation.js'
 
-async function welcome() {
-  await figlet(`Bill Splitter`, (err, data) => {
-    console.log(gradient.pastel.multiline(data) + '\n');
-  });
+async function displayWelcomeMessage () {
+  await figlet('Bill Splitter', (_err, data) => {
+    excitementLog(data + '\n')
+  })
 
-  console.log(
+  log(
     'Made By: ' +
-      '\u001b]8;;https://github.com/sujeet-agrahari\u0007Sujeet Agrahari\u001b]8;;\u0007'
-  );
+      '\u001b]8;;https://github.com/sujeet-agrahari\u0007Sujeet Agrahari\u001b]8;;\u0007\n'
+  )
 
-  console.log(`
-    ${chalk.cyanBright(
-      '🤝 Please follow the prompt and enter the information as asked'
-    )}.
-  `);
+  infoLog('🤝 Please follow the prompt and enter the information as asked \n')
 }
 
-async function askPersons() {
-  const answers = await inquirer.prompt({
-    name: 'persons',
-    type: 'input',
-    message: 'What is your name?',
-    default() {
-      return 'Player';
-    },
-  });
+async function getPersonNames () {
+  headingLog(' STEP-1 ')
+  instructionLog(
+    '👉 Enter the names of people sharing the lunch bill! (press ENTER to finish)'
+  )
 
-  playerName = answers.persons;
+  const personNames = await promptPersonName()
+
+  return personNames
 }
 
-async function getPersonNames() {
-  console.log(chalk.bgBlue('STEP-1'));
-  console.log(
-    chalk.bold.blue(
-      `👉 Enter the names of people sharing the lunch bill!(press ENTER to finish)`
-    )
-  );
-  const persons = [];
+async function getAmountAndSharedPersons (personNames) {
+  headingLog(' STEP-2 ')
+  instructionLog(
+    '👉 Enter the amount followed by the people who shared! (press ENTER to finish)'
+  )
+  const amountAndSharedPersons = promptAmountAndSharedPersons(personNames)
 
-  while (true) {
-    const answer = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'name',
-        message: "Enter a person's name:",
-      },
-    ]);
+  return amountAndSharedPersons
+}
 
-    if (answer.name.trim() === '') {
-      // If the entered name is empty, exit the loop
-      break;
+async function getAdditionalCostAndDeduction () {
+  headingLog(' STEP-3 ')
+  instructionLog(
+    '👉 Enter the additional charges: GST & Service Charge! (press ENTER to skip)'
+  )
+  return promptAdditionalCostAndDeduction()
+}
+
+function generatePaymentMessage (payDetail) {
+  let payMsg = ''
+
+  if (payDetail.payer || payDetail.upi) {
+    payMsg += 'Please pay the amount'
+
+    if (payDetail.payer) {
+      payMsg += ` to ${payDetail.payer}`
     }
 
-    persons.push(answer.name);
+    if (payDetail.upi) {
+      payMsg += ` at UPI ${payDetail.upi}`
+    }
   }
 
-  return persons;
+  return payMsg
 }
 
-async function getAmountAndSharedWithPersons(persons) {
-  console.log(chalk.bgBlue('STEP-2'));
-  console.log(
-    chalk.bold.blue(
-      `👉 Enter the amount followed by the people who shared!(press ENTER to finish)`
-    )
-  );
-  const amountAndSharedPersons = [];
-
-  while (true) {
-    const answerAmount = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'amount',
-        message: 'Enter the amount',
-        validate: (value) => {
-          const parsedValue = parseFloat(value);
-          return value.trim() === '' ||
-            (!isNaN(parsedValue) && parsedValue >= 0)
-            ? true
-            : '😠 Enter a valid positive number';
-        },
-      },
-    ]);
-
-    if (answerAmount.amount.trim() === '') {
-      // If the entered name is empty, exit the loop
-      break;
-    }
-
-    const answerSharedPersons = await inquirer.prompt([
-      {
-        type: 'checkbox',
-        name: 'sharedPersons',
-        message: 'Select persons who shared:',
-        choices: ['all', ...persons],
-        validate: (value) =>
-          value.length > 0 || chalk.red('😠 Select at least one person!'),
-      },
-    ]);
-
-    if (answerSharedPersons.sharedPersons.includes('all')) {
-      answerSharedPersons.sharedPersons = persons;
-    }
-
-    amountAndSharedPersons.push({
-      amount: parseFloat(answerAmount.amount),
-      sharedPersons: answerSharedPersons.sharedPersons,
-    });
-  }
-
-  return amountAndSharedPersons;
-}
-
-async function getAdditionalCharges() {
-  console.log(chalk.bgBlue('STEP-3'));
-  console.log(
-    chalk.bold.blue(
-      `👉 Enter the addition charges: GST & Service Charge!(press ENTER to skip)`
-    )
-  );
-  const answer = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'gst',
-      message: 'Enter the GST%',
-      validate: (value) =>
-        value.length > 0 || chalk.red('😠 Select at least one person!'),
-    },
-    {
-      type: 'input',
-      name: 'serviceCharge',
-      message: 'Enter service charge paid',
-      validate: (value) =>
-        value.length > 0 || chalk.red('😠 Select at least one person!'),
-    },
-  ]);
-
-  return {
-    gst: parseFloat(answer.gst),
-    serviceCharge: parseFloat(answer.serviceCharge),
-  };
-}
-
-function logResultTable(result) {
+function displayResultTable (billDetail, payDetail) {
   const table = new Table({
     head: ['Person', 'Amount'],
-    colWidths: [20, 10],
-  });
+    colWidths: [20, 10]
+  })
 
-  for (const person in result) {
-    table.push([person, result[person]]);
+  for (const person in billDetail) {
+    table.push([person, billDetail[person]])
   }
 
   // Display the table
-  const tableString = table.toString();
-  console.log(tableString);
+  const tableString = table.toString()
+  const payMsg = generatePaymentMessage(payDetail)
 
-  clipboardy.writeSync(stripAnsi(tableString));
-  console.log(
-    chalk.greenBright(`\n${figures.tick} Table copied to clipboard! \n`)
-  );
+  console.log(tableString)
+  infoLog(payMsg)
+
+  clipboardy.writeSync(`${stripAnsi(tableString)}\n${payMsg}`)
+
+  // Log success message
+  successLog(`\n${figures.tick} Table and Pay Details copied to clipboard! \n`)
+}
+// Assuming you have a successLog function in your logger module
+
+async function main () {
+  await displayWelcomeMessage()
+  const personNames = await getPersonNames()
+  const amountAndSharedPersons = await getAmountAndSharedPersons(personNames)
+  const additionalCostAndDeduction = await getAdditionalCostAndDeduction()
+  const billDetail = calculateAmounts(
+    amountAndSharedPersons,
+    additionalCostAndDeduction,
+    personNames
+  )
+  const payDetail = await promptPayerAndUPI()
+  excitementLog('\n🍻 The bill has been generated! \n')
+  displayResultTable(billDetail, payDetail)
+  thankYouLog(' Thanks for using Bill Splitter 🤗! \n')
 }
 
-function calculateAmounts(
-  sharedData,
-  taxPercentage = 0,
-  serviceCharge = 0,
-  persons
-) {
-  const result = {};
-  const individualServiceCharge = serviceCharge / persons.length;
-
-  sharedData.forEach((item) => {
-    const { amount, sharedPersons } = item;
-    const individualAmount = amount / sharedPersons.length;
-
-    sharedPersons.forEach((person) => {
-      result[person] = (result[person] || 0) + individualAmount;
-    });
-  });
-
-  // Apply tax to each person's amount
-  for (const person in result) {
-    const amountWithAdditionalCharge =
-      result[person] * (1 + taxPercentage / 100) + individualServiceCharge;
-    result[person] = parseFloat(amountWithAdditionalCharge.toFixed(2));
-  }
-
-  // add total to the table as well
-  result.Total = Object.values(result).reduce(
-    (total, amount) => total + amount,
-    0
-  );
-  logResultTable(result);
-}
-
-async function main() {
-  await welcome();
-  const persons = await getPersonNames();
-  const amountAndSharedPersons = await getAmountAndSharedWithPersons(persons);
-  const { gst, serviceCharge } = await getAdditionalCharges();
-  console.log(
-    gradient.pastel.multiline(`\n🍻 The bill has been generated!`) + '\n'
-  );
-  calculateAmounts(amountAndSharedPersons, gst, serviceCharge, persons);
-  console.log(chalk.bgMagenta(`Thanks for using Bill Splitter 🤗!\n`));
-}
-
-main();
+main()
