@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/sujeet-agrahari/bill-splitter/compare/v1.2.0...v2.0.0) (2023-12-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* refactor code and add feature to select name from pre-list
+
+### Features
+
+* refactor code and add feature to select name from pre-list ([fd0104c](https://github.com/sujeet-agrahari/bill-splitter/commit/fd0104cc22fb1bc6b514c686f9e87be95d0f557a))
+
 ## [1.2.0](https://github.com/sujeet-agrahari/bill-splitter/compare/v1.1.0...v1.2.0) (2023-12-18)
 
 
