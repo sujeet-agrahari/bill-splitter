@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/sujeet-agrahari/bill-splitter/compare/v2.0.4...v2.1.0) (2024-02-03)
+
+
+### Features
+
+* make remember payer details ([04334e1](https://github.com/sujeet-agrahari/bill-splitter/commit/04334e1621ef99515e467ff16f388eeacf3ef7f4))
+
 ### [2.0.4](https://github.com/sujeet-agrahari/bill-splitter/compare/v2.0.3...v2.0.4) (2024-02-03)
 
 ### [2.0.3](https://github.com/sujeet-agrahari/bill-splitter/compare/v2.0.2...v2.0.3) (2023-12-23)

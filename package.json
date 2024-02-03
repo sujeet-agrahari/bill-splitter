@@ -1,6 +1,6 @@
 {
   "name": "bill-splitter",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "CLI tool for easy restaurant bill splitting with optional taxes and service charges.",
   "main": "index.js",
   "type": "module",
